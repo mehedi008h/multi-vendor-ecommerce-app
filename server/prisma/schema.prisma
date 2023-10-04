@@ -11,14 +11,134 @@ datasource db {
 }
 
 model User {
-  id              Int             @id @default(autoincrement())
-  firstName       String
-  lastName        String
-  avatarUrl       String?
-  email           String          @unique
-  emailVerifiedAt DateTime?
-  password        String
-  rememberToken   String?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id                  Int             @id @default(autoincrement())
+  firstName           String
+  lastName            String
+  avatarUrl           Json?
+  email               String          @unique
+  phone               String? 
+  addresses           Address[]
+  emailVerifiedAt     DateTime?
+  password            String
+  role                Role            @default(USER)
+  active              Boolean         @default(false)
+  orders              Order[]
+  reviews             Review[]
+  rememberToken       String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  resetPasswordToken  String?
+  resetPasswordExpire DateTime?
+}
+
+model Shop {
+  id                  Int             @id @default(autoincrement())
+  shopName            String
+  description         String
+  logoUrl             Json?
+  coverUrl            Json?
+  images              Json?
+  email               String          @unique
+  phone               Json 
+  socialLinks         Json 
+  addresses           Address[]
+  verifiedAt          DateTime?
+  secret              String
+  active              Boolean         @default(false)
+  block               Boolean         @default(false)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  resetSecretToken    String?
+  resetSecretExpire   DateTime?
+}
+model Address {
+  id                  Int             @id @default(autoincrement())
+  country             String
+  city                String
+  address1            String
+  address2            String?         @unique
+  zipCode             String?          
+  addressType         AddressType     @default(HOME)
+  userId              Int
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shopId              Int
+  shop                Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  
+}
+
+model Category {
+  id                  Int             @id @default(autoincrement())
+  name                String
+  image               Json?
+  products            Product[]
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}
+
+model Product {
+  id                  Int             @id @default(autoincrement())
+  title               String
+  description         String
+  salePrice           Float
+  discountPrice       Float?
+  images              Json
+  rating              Float            @default(0.0)
+  stock               Int              @default(1)
+  soldOut             Int              @default(0)
+  category            Category         @relation(fields: [categoryId], references: [id],onDelete: Cascade)
+  categoryId          Int
+  colors              Json
+  order               Order?           @relation(fields: [orderId], references: [id],onDelete: Cascade)
+  orderId             Int?
+  reviews             Review[]
+  variants            Json
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+}
+
+model Review {
+  id                  Int              @id @default(autoincrement())
+  description         String
+  product             Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId           Int
+  rating              Float            @default(0.0)
+  user                User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId              Int
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+}
+
+model Order {
+  id                  Int              @id @default(autoincrement())
+  paymentIntent       String
+  paymentStatus       Boolean          @default(false)
+  itemsPrice          Float            @default(0.0)
+  taxPrice            Float            @default(0.0)
+  shippingPrice       Float            @default(0.0)
+  totalPrice          Float            @default(0.0)
+  products            Product[]
+  status              OrderStatus      @default(PROCESSING)
+  userId              Int
+  user                User             @relation(fields: [userId], references: [id])
+  paidAt              DateTime?        
+  deliveredAt         DateTime?         
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+  SELLER
+}
+
+enum AddressType {
+  HOME 
+  OFFICE
+  VARSITY
+}
+enum OrderStatus {
+  PROCESSING 
+  SHIPPED
+  DELIVERED
 }
