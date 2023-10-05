@@ -24,6 +24,9 @@ model User {
   active              Boolean         @default(false)
   orders              Order[]
   reviews             Review[]
+  coupounCodes        CoupounCode[]
+  follows             Follow[]
+  whiteLists          WhiteList[]
   rememberToken       String?
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
@@ -38,19 +41,50 @@ model Shop {
   logoUrl             Json?
   coverUrl            Json?
   images              Json?
-  email               String          @unique
-  phone               Json 
+  mails               String          @unique
+  phones              Json 
   socialLinks         Json 
+  totalSell           Float           @default(0.0)
+  returnPolicy        Int             @default(7)
+  moneyBackPolicy     Boolean         @default(true)
   addresses           Address[]
   verifiedAt          DateTime?
   secret              String
+  positiveRating      Int             @default(100)
+  shipOnTime          Int             @default(100)
+  chatResponse        Int             @default(100)
+  shopType            String          
+  shopCategory        String          
   active              Boolean         @default(false)
   block               Boolean         @default(false)
+  orders              Order[]
+  events              Event[]
+  coupounCodes        CoupounCode[]
+  followers           Follow[]
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
   resetSecretToken    String?
   resetSecretExpire   DateTime?
 }
+
+model Follow {
+  id                  Int             @id @default(autoincrement())
+  userId              Int
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shopId              Int
+  shop                Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt           DateTime        @default(now())
+}
+
+model WhiteList {
+  id                  Int             @id @default(autoincrement())
+  userId              Int
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product             Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId           Int
+  createdAt           DateTime        @default(now())
+}
+
 model Address {
   id                  Int             @id @default(autoincrement())
   country             String
@@ -63,7 +97,6 @@ model Address {
   user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   shopId              Int
   shop                Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  
 }
 
 model Category {
@@ -71,6 +104,7 @@ model Category {
   name                String
   image               Json?
   products            Product[]
+  event               Event[]
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
 }
@@ -80,17 +114,24 @@ model Product {
   title               String
   description         String
   salePrice           Float
-  discountPrice       Float?
+  discount            Int              @default(0)
   images              Json
   rating              Float            @default(0.0)
   stock               Int              @default(1)
   soldOut             Int              @default(0)
+  freeDelivery        Boolean          @default(false)
+  coin                Int              @default(0)
+  warranty            Boolean          @default(true)
+  warrantyDuration    Int              @default(0)
+  highlight           Json?            
+  specitications      Json?            
   category            Category         @relation(fields: [categoryId], references: [id],onDelete: Cascade)
   categoryId          Int
   colors              Json
   order               Order?           @relation(fields: [orderId], references: [id],onDelete: Cascade)
   orderId             Int?
   reviews             Review[]
+  whiteLists          WhiteList[]
   variants            Json
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
@@ -119,9 +160,44 @@ model Order {
   products            Product[]
   status              OrderStatus      @default(PROCESSING)
   userId              Int
-  user                User             @relation(fields: [userId], references: [id])
+  user                User             @relation(fields: [userId], references: [id],onDelete: Cascade)
+  shopId              Int
+  shop                Shop             @relation(fields: [shopId], references: [id], onDelete: Cascade)
   paidAt              DateTime?        
   deliveredAt         DateTime?         
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+}
+
+model Event {
+  id                  Int              @id @default(autoincrement())
+  title               String
+  description         String
+  images              Json
+  discount            Int              @default(0)
+  category            Category         @relation(fields: [categoryId], references: [id],onDelete: Cascade)
+  categoryId          Int
+  status              EventStatus      @default(PROCESSING)
+  startedAt           DateTime
+  endedAt             DateTime
+  shopId              Int
+  shop                Shop             @relation(fields: [shopId], references: [id], onDelete: Cascade) 
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+}
+
+model CoupounCode {
+  id                  Int              @id @default(autoincrement())
+  title               String
+  value               Int              @default(0)
+  minAmount           Int              @default(0)
+  maxAmount           Int?             @default(0)
+  startedAt           DateTime
+  endedAt             DateTime
+  shopId              Int
+  shop                Shop             @relation(fields: [shopId], references: [id], onDelete: Cascade) 
+  userId              Int?
+  user                User?            @relation(fields: [userId], references: [id],onDelete: Cascade)
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
 }
@@ -141,4 +217,12 @@ enum OrderStatus {
   PROCESSING 
   SHIPPED
   DELIVERED
+  CANCELLED
+  RETURN
+}
+enum EventStatus {
+  RUNNING 
+  ENDED
+  PROCESSING
+  STOP
 }
