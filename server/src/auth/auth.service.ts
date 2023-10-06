@@ -81,7 +81,7 @@ export class AuthService {
 
   // update refress token
   private async updateRefreshToken(email: string, refToken: string) {
-    await this.userService.updateRefreshTokenByEmail(email, refToken);
+    await this.updateRefreshTokenByEmail(email, refToken);
   }
 
   public async validateJwtPayload(payload: JwtPayload) {
@@ -92,7 +92,7 @@ export class AuthService {
 
   // logout
   public async logout(user: User) {
-    await this.userService.updateRefreshTokenByEmail(user.email, null);
+    await this.updateRefreshTokenByEmail(user.email, null);
   }
 
   // create refresh token
@@ -140,6 +140,36 @@ export class AuthService {
       access_token: accessToken,
       refresh_token: refreshToken,
     };
+  }
+
+  // update refress token
+  private async updateRefreshTokenByEmail(email: string, refToken: string) {
+    if (!refToken) {
+      const user = await this.userService.findOneByEmail(email.toLowerCase());
+      const saveEntity = { ...user, refreshToken: null };
+      return await this.prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: saveEntity,
+      });
+    }
+
+    // hash new token
+    const hashedToken = await this.hashData(refToken);
+    const user = await this.userService.findOneByEmail(email.toLowerCase());
+    const saveEntity = { ...user, refreshToken: hashedToken };
+    return await this.prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: saveEntity,
+    });
+  }
+
+  // hasing data
+  hashData(token: string) {
+    return bcrypt.hash(token, 10);
   }
 
   // compare password
