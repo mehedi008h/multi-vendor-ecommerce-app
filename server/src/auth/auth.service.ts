@@ -1,58 +1,149 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { JwtPayload } from 'jsonwebtoken';
+import { JwtService } from '@nestjs/jwt';
 
 import { CreateUserDto } from './dto/createUser.dto';
 import { User } from '@prisma/client';
-import { UserResponseInterface } from './types/userResponse.interface';
+import { UserService } from 'src/user/user.service';
+import { LoginUserDto } from './dto/loginUser.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   // create user
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const errorResponse = {
-      errors: {},
-    };
+    // check if user already exists
+    const existingUser = await this.userService.findOneByEmail(
+      createUserDto.email.toLowerCase(),
+    );
 
-    const userByEmail = await this.prisma.user.findUnique({
-      where: { email: createUserDto.email },
-    });
-
-    if (userByEmail) {
-      errorResponse.errors['email'] =
-        'An account with that email already exists!';
-    }
-
-    if (userByEmail) {
-      throw new HttpException(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
+    if (existingUser) {
+      throw new ConflictException('User with email already exists');
     }
 
     // hased password
     const hashedPassword = await this.hashPassword(createUserDto.password);
 
-    return await this.prisma.user.create({
-      data: {
-        firstName: createUserDto.firstName,
-        lastName: createUserDto.lastName,
-        email: createUserDto.email,
-        password: hashedPassword,
-      },
-    });
+    try {
+      const user = await this.prisma.user.create({
+        data: {
+          firstName: createUserDto.firstName,
+          lastName: createUserDto.lastName,
+          email: createUserDto.email,
+          password: hashedPassword,
+        },
+      });
+      return user;
+    } catch (err) {
+      throw new ConflictException(`User already exist with same email`);
+    }
+  }
+
+  // login
+  async validateUserByPassword(payload: LoginUserDto) {
+    const { email, password } = payload;
+    const user = await this.userService.findOneByEmail(email);
+
+    if (!user) {
+      // we will throw some custom exception later
+      throw new NotFoundException();
+    }
+
+    let isMatch = false;
+
+    isMatch = await this.comparePassword(password, user.password);
+
+    if (isMatch) {
+      const data = await this.createToken(user);
+      await this.updateRefreshToken(user.email, data.refresh_token);
+      return data;
+    } else {
+      throw new NotFoundException(`User with email password not found`);
+    }
   }
 
   // create hashed password
   async hashPassword(password: string): Promise<string> {
-    return bcrypt.hash(password, 12);
+    return bcrypt.hash(password, 10);
   }
 
-  buildUserResponse(user: User): UserResponseInterface {
-    return {
-      user: {
-        ...user,
-        token: 'dsfdsf',
+  // update refress token
+  private async updateRefreshToken(email: string, refToken: string) {
+    await this.userService.updateRefreshTokenByEmail(email, refToken);
+  }
+
+  public async validateJwtPayload(payload: JwtPayload) {
+    const data = await this.userService.findOneByEmail(payload.email);
+    delete data.password;
+    return data;
+  }
+
+  // logout
+  public async logout(user: User) {
+    await this.userService.updateRefreshTokenByEmail(user.email, null);
+  }
+
+  // create refresh token
+  public async refreshToken(user: User) {
+    const { refreshToken, email } = user;
+    const userData = await this.prisma.user.findUnique({
+      where: {
+        email,
       },
+    });
+    if (!userData) {
+      throw new ForbiddenException();
+    }
+    const isMatchFound = await bcrypt.compare(
+      refreshToken,
+      userData.refreshToken,
+    );
+    if (!isMatchFound) {
+      throw new ForbiddenException();
+    }
+    const tokens = await this.createToken(user);
+    await this.updateRefreshToken(user.email, tokens.refresh_token);
+    return tokens;
+  }
+
+  // create access token
+  public async createToken(user: User) {
+    const data: JwtPayload = {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
     };
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(data, {
+        secret: process.env.JWT_ACCESS_TOKEN_SECRET,
+        expiresIn: '1d',
+      }),
+      this.jwtService.signAsync(data, {
+        secret: process.env.JWT_REFRESH_TOKEN_SECRET,
+        expiresIn: '1d',
+      }),
+    ]);
+    return {
+      ...data,
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    };
+  }
+
+  // compare password
+  private async comparePassword(enteredPassword, dbPassword) {
+    return await bcrypt.compare(enteredPassword, dbPassword);
   }
 }
