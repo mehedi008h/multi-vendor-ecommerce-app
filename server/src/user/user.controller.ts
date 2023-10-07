@@ -13,6 +13,7 @@ import { CurrentUser } from './decorators/user.decorator';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { UserService } from './user.service';
 import { UserResponseInterface } from 'src/auth/types/userResponse.interface';
+import { ChangePasswordDto } from './dto/changePassword.dto';
 
 @Controller('user')
 export class UserController {
@@ -35,5 +36,16 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UserResponseInterface> {
     return this.userService.updateUser(currentUser.id, updateUserDto);
+  }
+
+  // update current logged-in user
+  @UseGuards(AccessTokenGuard)
+  @HttpCode(HttpStatus.OK)
+  @Put('/change-password')
+  public async changePassword(
+    @CurrentUser() currentUser: User,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<UserResponseInterface> {
+    return this.userService.changePassword(currentUser.id, changePasswordDto);
   }
 }

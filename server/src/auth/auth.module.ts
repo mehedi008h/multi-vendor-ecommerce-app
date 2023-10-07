@@ -18,8 +18,8 @@ import { AccessTokenJwtStrategy } from './strategies/access_jwt-strategy';
   ],
   providers: [
     AuthService,
-    PrismaService,
     UserService,
+    PrismaService,
     JwtService,
     RefreshTokenJwtStrategy,
     AccessTokenJwtStrategy,

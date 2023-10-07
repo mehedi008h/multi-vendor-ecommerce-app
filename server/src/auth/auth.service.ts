@@ -3,6 +3,8 @@ import {
   ForbiddenException,
   NotFoundException,
   ConflictException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -17,8 +19,9 @@ import { LoginUserDto } from './dto/loginUser.dto';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
+    private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -75,7 +78,7 @@ export class AuthService {
   }
 
   // create hashed password
-  async hashPassword(password: string): Promise<string> {
+  public async hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, 10);
   }
 
@@ -173,7 +176,7 @@ export class AuthService {
   }
 
   // compare password
-  private async comparePassword(enteredPassword, dbPassword) {
+  public async comparePassword(enteredPassword, dbPassword) {
     return await bcrypt.compare(enteredPassword, dbPassword);
   }
 }
