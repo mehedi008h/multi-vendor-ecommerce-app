@@ -1,9 +1,3 @@
-/*
-  Warnings:
-
-  - The `avatarUrl` column on the `User` table would be dropped and recreated. This will lead to data loss if there is data in the column.
-
-*/
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN', 'SELLER');
 
@@ -16,14 +10,27 @@ CREATE TYPE "OrderStatus" AS ENUM ('PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCEL
 -- CreateEnum
 CREATE TYPE "EventStatus" AS ENUM ('RUNNING', 'ENDED', 'PROCESSING', 'STOP');
 
--- AlterTable
-ALTER TABLE "User" ADD COLUMN     "active" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "phone" TEXT,
-ADD COLUMN     "resetPasswordExpire" TIMESTAMP(3),
-ADD COLUMN     "resetPasswordToken" TEXT,
-ADD COLUMN     "role" "Role" NOT NULL DEFAULT 'USER',
-DROP COLUMN "avatarUrl",
-ADD COLUMN     "avatarUrl" JSONB;
+-- CreateTable
+CREATE TABLE "User" (
+    "id" SERIAL NOT NULL,
+    "firstName" TEXT NOT NULL,
+    "lastName" TEXT NOT NULL,
+    "avatarUrl" JSONB,
+    "email" TEXT NOT NULL,
+    "phone" TEXT,
+    "emailVerifiedAt" TIMESTAMP(3),
+    "password" TEXT NOT NULL,
+    "role" "Role" NOT NULL DEFAULT 'USER',
+    "active" BOOLEAN NOT NULL DEFAULT false,
+    "coin" INTEGER NOT NULL DEFAULT 0,
+    "refreshToken" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "resetPasswordToken" TEXT,
+    "resetPasswordExpire" TIMESTAMP(3),
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Shop" (
@@ -85,8 +92,8 @@ CREATE TABLE "Address" (
     "address2" TEXT,
     "zipCode" TEXT,
     "addressType" "AddressType" NOT NULL DEFAULT 'HOME',
-    "userId" INTEGER NOT NULL,
-    "shopId" INTEGER NOT NULL,
+    "userId" INTEGER,
+    "shopId" INTEGER,
 
     CONSTRAINT "Address_pkey" PRIMARY KEY ("id")
 );
@@ -196,6 +203,9 @@ CREATE TABLE "CoupounCode" (
 
     CONSTRAINT "CoupounCode_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Shop_mails_key" ON "Shop"("mails");

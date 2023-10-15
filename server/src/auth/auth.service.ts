@@ -28,9 +28,11 @@ export class AuthService {
   // create user
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     // check if user already exists
-    const existingUser = await this.userService.findOneByEmail(
-      createUserDto.email.toLowerCase(),
-    );
+    const existingUser = await this.prisma.user.findUnique({
+      where: {
+        email: createUserDto.email.toLowerCase(),
+      },
+    });
 
     if (existingUser) {
       throw new ConflictException('User with email already exists');

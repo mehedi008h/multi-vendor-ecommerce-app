@@ -1,5 +1,6 @@
 import { $Enums, Prisma, User } from '@prisma/client';
 export class UserResponseInterface implements User {
+  coin: number;
   refreshToken: string;
   id: number;
   firstName: string;
