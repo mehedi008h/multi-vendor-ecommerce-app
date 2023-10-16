@@ -10,6 +10,7 @@ import {
   Delete,
   Param,
   ParseIntPipe,
+  Put,
 } from '@nestjs/common';
 import { AddressService } from './address.service';
 import { AddAddressDto } from './dto/addAddress.dto';
@@ -17,6 +18,7 @@ import { AddressResponseInterface } from './types/addressResponse.interface';
 import { CurrentUser } from 'src/user/decorators/user.decorator';
 import { User } from '@prisma/client';
 import { AccessTokenGuard } from 'src/auth/guards/access_token.guard';
+import { UpdateAddressDto } from './dto/updateAddress.dto';
 
 @Controller('address')
 export class AddressController {
@@ -37,6 +39,22 @@ export class AddressController {
       addAddressDto,
     );
     return address;
+  }
+
+  // update user address
+  @UseGuards(AccessTokenGuard)
+  @HttpCode(HttpStatus.OK)
+  @Put('/update-user')
+  @UsePipes(new ValidationPipe())
+  async updateUserAddress(
+    @CurrentUser() currentUser: User,
+    @Body() updateAddressDto: UpdateAddressDto,
+  ): Promise<AddressResponseInterface> {
+    // delete address
+    return await this.addressService.updateUserAddress(
+      currentUser.id,
+      updateAddressDto,
+    );
   }
 
   // delete user address

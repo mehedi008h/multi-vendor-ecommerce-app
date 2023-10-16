@@ -3,6 +3,7 @@ import { Address } from '@prisma/client';
 import { UserService } from 'src/user/user.service';
 import { AddAddressDto } from './dto/addAddress.dto';
 import { PrismaService } from 'src/prisma.service';
+import { UpdateAddressDto } from './dto/updateAddress.dto';
 
 @Injectable()
 export class AddressService {
@@ -31,6 +32,22 @@ export class AddressService {
     });
 
     return address;
+  }
+
+  // update user address
+  async updateUserAddress(
+    userId: number,
+    updateAddressDto: UpdateAddressDto,
+  ): Promise<Address> {
+    // check user exists
+    const user = await this.userService.findOneById(userId);
+    return await this.prisma.address.update({
+      where: {
+        id: updateAddressDto.id,
+        userId: user.id,
+      },
+      data: updateAddressDto,
+    });
   }
 
   // delete user address
