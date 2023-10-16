@@ -27,6 +27,7 @@ model User {
   coupounCodes        CoupounCode[]
   follows             Follow[]
   whiteLists          WhiteList[]
+  shops               Shop[]
   coin                Int             @default(0)
   refreshToken        String?
   createdAt           DateTime        @default(now())
@@ -42,7 +43,7 @@ model Shop {
   logoUrl             Json?
   coverUrl            Json?
   images              Json?
-  mails               String          @unique
+  mails               Json            
   phones              Json 
   socialLinks         Json 
   totalSell           Float           @default(0.0)
@@ -50,12 +51,14 @@ model Shop {
   moneyBackPolicy     Boolean         @default(true)
   addresses           Address[]
   verifiedAt          DateTime?
-  secret              String
+  secret              String?
   positiveRating      Int             @default(100)
   shipOnTime          Int             @default(100)
   chatResponse        Int             @default(100)
-  shopType            String          
-  shopCategory        String          
+  shopType            String
+  shopOwnerId         Int
+  shopOwner           User            @relation(fields: [shopOwnerId], references: [id], onDelete: Cascade)
+  shopCategorys       Category[]         
   active              Boolean         @default(false)
   block               Boolean         @default(false)
   orders              Order[]
@@ -106,6 +109,7 @@ model Category {
   image               Json?
   products            Product[]
   event               Event[]
+  shops               Shop[]
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
 }
