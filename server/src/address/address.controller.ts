@@ -11,6 +11,7 @@ import {
   Param,
   ParseIntPipe,
   Put,
+  Get,
 } from '@nestjs/common';
 import { AddressService } from './address.service';
 import { AddAddressDto } from './dto/addAddress.dto';
@@ -41,6 +42,31 @@ export class AddressController {
     return address;
   }
 
+  // get user address details
+  @UseGuards(AccessTokenGuard)
+  @HttpCode(HttpStatus.OK)
+  @Get('/user')
+  @UsePipes(new ValidationPipe())
+  async getUserAlAddress(
+    @CurrentUser() currentUser: User,
+  ): Promise<AddressResponseInterface[]> {
+    // get address
+    return await this.addressService.getUserAllAddress(currentUser.id);
+  }
+
+  // get user address details
+  @UseGuards(AccessTokenGuard)
+  @HttpCode(HttpStatus.OK)
+  @Get('/details/:id')
+  @UsePipes(new ValidationPipe())
+  async getUserAddress(
+    @CurrentUser() currentUser: User,
+    @Param(`id`, ParseIntPipe) id: number,
+  ): Promise<AddressResponseInterface> {
+    // get address
+    return await this.addressService.getUserAddress(currentUser.id, id);
+  }
+
   // update user address
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.OK)
@@ -50,7 +76,7 @@ export class AddressController {
     @CurrentUser() currentUser: User,
     @Body() updateAddressDto: UpdateAddressDto,
   ): Promise<AddressResponseInterface> {
-    // delete address
+    // update address
     return await this.addressService.updateUserAddress(
       currentUser.id,
       updateAddressDto,

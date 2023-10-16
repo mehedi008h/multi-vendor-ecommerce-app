@@ -18,7 +18,6 @@ export class AddAddressDto {
   @IsString({ message: 'Address 1 must be a string.' })
   readonly address1: string;
 
-  @IsString({ message: 'Address 2 must be a string.' })
   readonly address2: string;
 
   @IsString({ message: 'Address type must be a string.' })
