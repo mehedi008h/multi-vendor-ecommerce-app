@@ -28,11 +28,20 @@ export class AddressService {
         addressType: addAddressDto.addressType,
         userId: user.id,
       },
-      include: {
-        user: true,
-      },
     });
 
     return address;
+  }
+
+  // delete user address
+  async deleteUserAddress(userId: number, addressId: number): Promise<Address> {
+    // check user exists
+    const user = await this.userService.findOneById(userId);
+    return await this.prisma.address.delete({
+      where: {
+        id: addressId,
+        userId: user.id,
+      },
+    });
   }
 }

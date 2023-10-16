@@ -7,6 +7,9 @@ import {
   UsePipes,
   ValidationPipe,
   UseGuards,
+  Delete,
+  Param,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AddressService } from './address.service';
 import { AddAddressDto } from './dto/addAddress.dto';
@@ -24,7 +27,7 @@ export class AddressController {
   @HttpCode(HttpStatus.OK)
   @Post('/add-user')
   @UsePipes(new ValidationPipe())
-  async createUser(
+  async addUserAddress(
     @CurrentUser() currentUser: User,
     @Body() addAddressDto: AddAddressDto,
   ): Promise<AddressResponseInterface> {
@@ -34,5 +37,18 @@ export class AddressController {
       addAddressDto,
     );
     return address;
+  }
+
+  // delete user address
+  @UseGuards(AccessTokenGuard)
+  @HttpCode(HttpStatus.OK)
+  @Delete('/delete-user/:id')
+  @UsePipes(new ValidationPipe())
+  async deleteUserAddress(
+    @CurrentUser() currentUser: User,
+    @Param(`id`, ParseIntPipe) id: number,
+  ): Promise<AddressResponseInterface> {
+    // delete address
+    return await this.addressService.deleteUserAddress(currentUser.id, id);
   }
 }
