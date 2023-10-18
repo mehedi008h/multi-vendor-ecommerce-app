@@ -1,10 +1,12 @@
 import React from "react";
-import { TopHead } from ".";
+import { LinkBar, SearchBar, TopHead } from ".";
 
 const Navbar = () => {
     return (
         <div className="w-full">
             <TopHead />
+            <SearchBar />
+            <LinkBar />
         </div>
     );
 };
