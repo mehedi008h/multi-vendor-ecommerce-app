@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import { SiHotjar } from "react-icons/si";
 import {
     MdKeyboardArrowDown,
     MdKeyboardArrowUp,
     MdOutlineDashboard,
 } from "react-icons/md";
+import { DropdownMenu } from "../common";
+import { LinkItem } from ".";
 
 // category data for link
 const categories = [
@@ -41,12 +41,6 @@ const categories = [
         id: 6,
         name: "Blog",
         link: "/",
-        subMenu: true,
-    },
-    {
-        id: 7,
-        name: "Pages",
-        subMenu: true,
     },
     {
         id: 8,
@@ -61,81 +55,48 @@ const categories = [
 ];
 
 const LinkBar = () => {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState<boolean>(false);
+    const [dropdownType, setDropdownType] = useState<string>("");
+
+    const handleDropDown = (type: string) => {
+        setDropdownType(type);
+        setOpen(!open);
+    };
+
+    const toogleCategory = open && dropdownType === "category";
     return (
         <div className="w-full linkBar relative">
             <div className="w-full px-8 h-14 xl:flex lg:flex md:flex hidden justify-start items-center gap-8">
                 {/* Browse All Category  */}
-                <div className="min-w-fit bg-green-700 px-3 py-1.5 rounded-lg text-white flex items-center gap-2 mr-5">
+                <div
+                    onClick={() => handleDropDown("category")}
+                    className="cursor-pointer min-w-fit bg-green-700 px-3 py-1.5 rounded-lg text-white flex items-center gap-2 mr-5"
+                >
                     <MdOutlineDashboard size={21} />
                     <p className="text-base">Browse All Category</p>
                     {open ? (
-                        <MdKeyboardArrowUp
-                            size={20}
-                            onClick={() => setOpen(!open)}
-                        />
+                        <MdKeyboardArrowUp size={20} />
                     ) : (
-                        <MdKeyboardArrowDown
-                            size={20}
-                            onClick={() => setOpen(!open)}
-                        />
+                        <MdKeyboardArrowDown size={20} />
                     )}
                 </div>
                 {/* links  */}
-                {categories.map((category, index) => (
-                    <>
-                        {category.link ? (
-                            <Link
-                                to={category.link}
-                                key={index}
-                                className="min-w-fit font-roboto font-medium hover:text-blue-600 link gap-3"
-                            >
-                                <div
-                                    className={`flex item-center items-center gap-2 ${
-                                        category.color && category.color
-                                    }`}
-                                >
-                                    {category.icon && category.icon}
-                                    <div>{category.name}</div>
-                                </div>
-                            </Link>
-                        ) : (
-                            <button
-                                key={index}
-                                className="font-roboto font-medium hover:text-blue-600 link gap-3"
-                            >
-                                <div className="flex item-center items-center gap-2">
-                                    {category.icon && category.icon}
-                                    <div>{category.name}</div>
-                                    {open ? (
-                                        <MdKeyboardArrowUp
-                                            size={20}
-                                            onClick={() => setOpen(!open)}
-                                        />
-                                    ) : (
-                                        <MdKeyboardArrowDown
-                                            size={20}
-                                            onClick={() => setOpen(!open)}
-                                        />
-                                    )}
-                                </div>
-                            </button>
-                        )}
-                    </>
+                {categories.map((category) => (
+                    <LinkItem
+                        category={category}
+                        open={open}
+                        handleDropDown={handleDropDown}
+                        dropdownType={dropdownType}
+                        key={category.id}
+                    />
                 ))}
                 {/* toogle  */}
-                {open && (
-                    <motion.div
-                        animate={{
-                            height: open ? "400px" : "0px",
-
-                            transition: {
-                                duration: 0.5,
-                                type: "spring",
-                                damping: 10,
-                            },
-                        }}
-                        className="glass w-[250px] absolute top-14 left-8 z-50 border rounded-md flex flex-col gap-2 overflow-x-hidden overflow-y-scroll hide-scroll-bar"
+                {toogleCategory && (
+                    <DropdownMenu
+                        open={open}
+                        top="top-14"
+                        left="left-8"
+                        width="w-[245px]"
                     >
                         {categories.map((item, index) => (
                             <div
@@ -148,7 +109,7 @@ const LinkBar = () => {
                                 </p>
                             </div>
                         ))}
-                    </motion.div>
+                    </DropdownMenu>
                 )}
             </div>
         </div>

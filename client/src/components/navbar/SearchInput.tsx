@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BiSearchAlt } from "react-icons/bi";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
-import { motion } from "framer-motion";
+import { DropdownMenu } from "../common";
 
 // category data for search
 const categories = [
@@ -47,18 +47,7 @@ const SearchInput = () => {
                     )}
                 </div>
                 {open && (
-                    <motion.div
-                        animate={{
-                            height: open ? "400px" : "0px",
-
-                            transition: {
-                                duration: 0.5,
-                                type: "spring",
-                                damping: 10,
-                            },
-                        }}
-                        className="glass w-[300px] absolute top-9 -left-2 z-50 border rounded-md flex flex-col gap-2 overflow-x-hidden overflow-y-scroll hide-scroll-bar"
-                    >
+                    <DropdownMenu open={open} top="top-9" left="-left-2">
                         {categories.map((item, index) => (
                             <div
                                 onClick={() => handleCategory(item)}
@@ -69,7 +58,7 @@ const SearchInput = () => {
                                 <p className="font-semibold text-sm">{item}</p>
                             </div>
                         ))}
-                    </motion.div>
+                    </DropdownMenu>
                 )}
             </div>
             {/* search input  */}
