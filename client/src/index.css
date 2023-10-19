@@ -91,3 +91,17 @@ body {
 .linkBar {
     background: linear-gradient(66deg, #e6fbfe 0%, #edddfb 100%);
 }
+
+.next_btn {
+    animation: nextMove 3s ease-in-out infinite;
+}
+
+@keyframes nextMove {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    50% {
+        transform: translateX(5px);
+    }
+}

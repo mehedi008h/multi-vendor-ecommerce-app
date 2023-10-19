@@ -13,7 +13,7 @@ const CategorySlider = () => {
         <div className="h-[30vh] mt-3">
             <Swiper
                 slidesPerView={8}
-                spaceBetween={18}
+                spaceBetween={25}
                 pagination={false}
                 navigation={false}
                 autoplay={{
