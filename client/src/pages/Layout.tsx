@@ -8,7 +8,7 @@ const Layout = () => {
             {/* navbar  */}
             <Navbar />
             {/* outlet  */}
-            <div>
+            <div className="w-full px-8 py-2">
                 <Outlet />
             </div>
         </Container>
