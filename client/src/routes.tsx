@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import { ErrorPage, HomePage, Layout } from "./pages";
+import { ErrorPage, HomePage, Layout, ShopPage } from "./pages";
 
 const router = createBrowserRouter([
     {
@@ -10,6 +10,10 @@ const router = createBrowserRouter([
             {
                 index: true,
                 element: <HomePage />,
+            },
+            {
+                path: "/shop",
+                element: <ShopPage />,
             },
         ],
     },

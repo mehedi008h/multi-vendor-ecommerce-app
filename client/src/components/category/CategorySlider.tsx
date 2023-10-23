@@ -1,6 +1,5 @@
 // Import Swiper React components
 import { Swiper, SwiperSlide } from "swiper/react";
-
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/pagination";
@@ -8,9 +7,10 @@ import "swiper/css/navigation";
 
 // import required modules
 import { Pagination, Navigation, Autoplay } from "swiper/modules";
+import placeHolder from "../../assets/no-image-placeholder.webp";
 const CategorySlider = () => {
     return (
-        <div className="h-[30vh] mt-3">
+        <div className="h-[30vh] my-5">
             <Swiper
                 slidesPerView={8}
                 spaceBetween={25}
@@ -28,8 +28,14 @@ const CategorySlider = () => {
                     18,
                 ]?.map((image, i) => (
                     <SwiperSlide key={i}>
-                        <div className="h-[30vh] w-40 bg-[#FFF4F6] border rounded-md flex flex-col justify-center items-center hover:shadow-lg hover:border-teal-200 cursor-pointer">
-                            <div className="h-16 w-16 rounded-lg bg-black mb-3"></div>
+                        <div className="h-[30vh] w-40 bg-[#FFFFFF] border rounded-md flex flex-col justify-center items-center hover:shadow-lg hover:border-teal-200 cursor-pointer">
+                            <div className="h-20 w-20 rounded-lg mb-3">
+                                <img
+                                    src={placeHolder}
+                                    className="w-full h-dull rounded-md"
+                                    alt=""
+                                />
+                            </div>
                             <h1 className="font-semibold">Eid Collections</h1>
                             <p className="text-sm text-gray-500">26 item</p>
                         </div>

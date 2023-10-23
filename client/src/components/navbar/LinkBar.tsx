@@ -25,7 +25,7 @@ const categories = [
     {
         id: 3,
         name: "Shop",
-        link: "/",
+        link: "/shop",
     },
     {
         id: 4,

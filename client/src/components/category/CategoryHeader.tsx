@@ -4,7 +4,14 @@ import { BsArrowRightShort } from "react-icons/bs";
 const CategoryHeader = () => {
     return (
         <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Featured Categories</h1>
+            <div>
+                <h1 className="text-3xl font-bold text-[#425A8B]">
+                    Featured Categories
+                </h1>
+                <p className="text-sm text-gray-600">
+                    Choose your necessary products from this feature categories.
+                </p>
+            </div>
             <Button
                 btnText="View All"
                 bg="bg-gradient-to-r from-cyan-500 to-blue-500"

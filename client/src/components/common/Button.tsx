@@ -1,7 +1,7 @@
 import React from "react";
 
 interface Props {
-    btnText: string;
+    btnText?: string;
     bg: string;
     btnStyle?: string;
     leftIcon?: React.ReactNode;
